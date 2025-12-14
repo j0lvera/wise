@@ -1,0 +1,11 @@
+patterns:
+  - name: "go-source-files"
+    filename: "\\.go$"
+    context:
+      - "go-good-practices.md"
+      - "cli-guidelines-short.md"
+      - "logging.md"
+    diff_context:
+      - "go-good-practices.md"
+      - "cli-guidelines-short.md"
+      - "logging.md"
