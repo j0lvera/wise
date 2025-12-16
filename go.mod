@@ -1,4 +1,4 @@
-module agent
+module github.com/j0lvera/wise
 
 go 1.24.4
 

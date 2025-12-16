@@ -1,6 +1,6 @@
 package main
 
-import "agent/cmd"
+import "github.com/j0lvera/wise/cmd"
 
 func main() {
 	cmd.Execute()

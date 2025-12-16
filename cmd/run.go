@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"agent/agent"
+	"github.com/j0lvera/wise/agent"
 
 	"github.com/spf13/cobra"
 )
@@ -20,19 +20,19 @@ var runCmd = &cobra.Command{
 
 Examples:
   # Run a task
-  agent run "Create a file called hello.txt"
+  wise run "Create a file called hello.txt"
 
   # Verbose output (debug logging)
-  agent run "List files" -v
+  wise run "List files" -v
 
   # Pipe task from stdin
-  echo "Create hello.txt" | agent run -
+  echo "Create hello.txt" | wise run -
 
   # JSON output for scripting
-  agent run "List files" --json
+  wise run "List files" --json
 
   # Quiet mode (errors only)
-  agent run "Build the project" -q`,
+  wise run "Build the project" -q`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runAgent,
 }
@@ -51,7 +51,7 @@ type RunResult struct {
 func runAgent(cmd *cobra.Command, args []string) error {
 	task := getTask(args)
 	if task == "" {
-		return userError("no task provided. Usage: agent run \"your task\"")
+		return userError("no task provided. Usage: wise run \"your task\"")
 	}
 
 	// Load config

@@ -25,10 +25,10 @@ const (
 )
 
 var rootCmd = &cobra.Command{
-	Use:     "agent",
+	Use:     "wise",
 	Short:   "An LLM-powered command execution agent",
 	Version: Version,
-	Long: `Agent is a minimal software engineering agent that executes
+	Long: `Wise is a minimal software engineering agent that executes
 shell commands based on LLM responses.
 
 Exit codes:
@@ -39,10 +39,10 @@ Exit codes:
   127  Command not found
 
 Examples:
-  agent run "Create a hello.txt file"
-  agent run "List files" -v
-  agent run "Create file" -q
-  echo "Create hello.txt" | agent run -`,
+  wise run "Create a hello.txt file"
+  wise run "List files" -v
+  wise run "Create file" -q
+  echo "Create hello.txt" | wise run -`,
 	PersistentPreRunE: validateFlags,
 }
 

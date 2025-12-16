@@ -1,4 +1,4 @@
-# agent
+# wise
 
 Small agent heavily inspired by [mini-swe-agent](https://github.com/SWE-agent/mini-swe-agent), the 100-line Python agent that scores 74% on SWE-bench. This is a Go implementation of the same philosophy.
 
@@ -29,15 +29,15 @@ Every step appends to the message list. No branching, no complex state managemen
 ## Installation
 
 ```bash
-go install github.com/j0lvera/agent@latest
+go install github.com/j0lvera/wise@latest
 ```
 
 Or build from source:
 
 ```bash
-git clone https://github.com/j0lvera/agent
-cd agent
-go build -o agent .
+git clone https://github.com/j0lvera/wise
+cd wise
+go build -o wise .
 ```
 
 ## Configuration
@@ -72,21 +72,21 @@ See [config.example.toml](config.example.toml) for all options.
 ### Basic
 
 ```bash
-agent run "List all Go files in this directory"
+wise run "List all Go files in this directory"
 ```
 
 ### From Stdin
 
 ```bash
-echo "Create a file called hello.txt with 'Hello World'" | agent run -
+echo "Create a file called hello.txt with 'Hello World'" | wise run -
 ```
 
 ### Flags
 
 ```bash
-agent run "your task" -v    # Verbose (debug logging)
-agent run "your task" -q    # Quiet (errors only)
-agent run "your task" --json # JSON output
+wise run "your task" -v    # Verbose (debug logging)
+wise run "your task" -q    # Quiet (errors only)
+wise run "your task" --json # JSON output
 ```
 
 ### Exit Codes
