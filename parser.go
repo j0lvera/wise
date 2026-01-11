@@ -1,15 +1,12 @@
-package agent
+package wise
 
 import (
 	"fmt"
 	"regexp"
 	"strings"
-)
 
-// Parser extracts executable actions from LLM responses.
-type Parser interface {
-	ParseAction(response string) (Action, error)
-}
+	"github.com/j0lvera/wise/environments/local"
+)
 
 // commandRegex is compiled once at package level for performance.
 var commandRegex = regexp.MustCompile("(?s)```bash\\s*\\n(.*?)\\n```")
@@ -49,7 +46,7 @@ func (p *BashParser) ParseAction(response string) (Action, error) {
 	}
 
 	return Action{
-		Type:    ActionTypeBash,
+		Type:    local.ActionTypeBash,
 		Command: command,
 	}, nil
 }
