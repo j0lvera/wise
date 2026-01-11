@@ -5,8 +5,6 @@ go 1.24.4
 toolchain go1.24.10
 
 require (
-	github.com/BurntSushi/toml v1.5.0
-	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.10.2
 	github.com/tmc/langchaingo v0.1.14

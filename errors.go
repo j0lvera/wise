@@ -1,6 +1,15 @@
-package agent
+package wise
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+// Domain errors.
+var (
+	ErrModelRequired       = errors.New("model is required")
+	ErrEnvironmentRequired = errors.New("environment is required")
+)
 
 // TerminationReason indicates why the agent stopped.
 type TerminationReason string
