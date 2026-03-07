@@ -25,10 +25,8 @@ func main() {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			task := args[0]
 
-			// Build model config
-			modelCfg := openai.NewConfig().
-				WithAPIKey(os.Getenv("API_KEY")).
-				WithBaseURL(os.Getenv("BASE_URL"))
+			// Build model config — falls back to OPENAI_API_KEY and OPENAI_BASE_URL env vars
+			modelCfg := openai.NewConfig()
 
 			modelName := os.Getenv("MODEL")
 			if modelName == "" {

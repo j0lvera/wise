@@ -32,6 +32,7 @@ type Config struct {
 	logger        *zerolog.Logger
 	output        io.Writer
 	maxSteps      int
+	contextLimit  int
 	systemPrompt  string
 	actionHandler ActionHandler
 }
@@ -66,6 +67,12 @@ func (c Config) WithOutput(w io.Writer) Config {
 // WithMaxSteps sets the maximum number of agent steps.
 func (c Config) WithMaxSteps(n int) Config {
 	c.maxSteps = n
+	return c
+}
+
+// WithContextLimit sets the context window size in tokens.
+func (c Config) WithContextLimit(n int) Config {
+	c.contextLimit = n
 	return c
 }
 

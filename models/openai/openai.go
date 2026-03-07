@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/j0lvera/wise/models"
 
@@ -41,9 +42,17 @@ type model struct {
 }
 
 // New creates a new OpenAI-compatible model.
+// Falls back to OPENAI_API_KEY and OPENAI_BASE_URL env vars when not set via builder.
 func New(modelName string, cfg Config) (models.Model, error) {
 	if cfg.apiKey == "" {
-		return nil, fmt.Errorf("API key is required")
+		cfg.apiKey = os.Getenv("OPENAI_API_KEY")
+	}
+	if cfg.baseURL == "" {
+		cfg.baseURL = os.Getenv("OPENAI_BASE_URL")
+	}
+
+	if cfg.apiKey == "" {
+		return nil, fmt.Errorf("API key is required (set via WithAPIKey or OPENAI_API_KEY)")
 	}
 
 	clientOpts := []openai.Option{
@@ -62,8 +71,8 @@ func New(modelName string, cfg Config) (models.Model, error) {
 	return &model{cfg: cfg, name: modelName, client: client}, nil
 }
 
-// Query sends messages to the LLM and returns the response.
-func (m *model) Query(ctx context.Context, messages []models.Message) (string, error) {
+// Query sends messages to the LLM and returns the response with token usage.
+func (m *model) Query(ctx context.Context, messages []models.Message) (string, models.TokenUsage, error) {
 	llmMessages := make([]llms.MessageContent, 0, len(messages))
 
 	for _, msg := range messages {
@@ -83,12 +92,34 @@ func (m *model) Query(ctx context.Context, messages []models.Message) (string, e
 
 	resp, err := m.client.GenerateContent(ctx, llmMessages)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate content: %w", err)
+		return "", models.TokenUsage{}, fmt.Errorf("failed to generate content: %w", err)
 	}
 
 	if len(resp.Choices) == 0 {
-		return "", fmt.Errorf("no choices returned from model")
+		return "", models.TokenUsage{}, fmt.Errorf("no choices returned from model")
 	}
 
-	return resp.Choices[0].Content, nil
+	usage := extractTokenUsage(resp.Choices[0])
+
+	return resp.Choices[0].Content, usage, nil
+}
+
+// extractTokenUsage pulls token counts from langchaingo's GenerationInfo map.
+func extractTokenUsage(choice *llms.ContentChoice) models.TokenUsage {
+	if choice.GenerationInfo == nil {
+		return models.TokenUsage{}
+	}
+
+	info := choice.GenerationInfo
+	usage := models.TokenUsage{}
+
+	if v, ok := info["PromptTokens"].(int); ok {
+		usage.PromptTokens = v
+	}
+	if v, ok := info["CompletionTokens"].(int); ok {
+		usage.CompletionTokens = v
+	}
+
+	usage.TotalTokens = usage.PromptTokens + usage.CompletionTokens
+	return usage
 }

@@ -7,19 +7,17 @@ import (
 	"strings"
 
 	"github.com/j0lvera/wise"
-	"github.com/j0lvera/wise/environments/local"
+	"github.com/j0lvera/wise/executor/local"
 	"github.com/j0lvera/wise/models/openai"
 )
 
 func main() {
-	// Build model
-	modelCfg := openai.NewConfig().
-		WithAPIKey(os.Getenv("API_KEY")).
-		WithBaseURL("https://openrouter.ai/api/v1")
+	// Build model — falls back to OPENAI_API_KEY and OPENAI_BASE_URL env vars
+	modelCfg := openai.NewConfig()
 
 	modelName := os.Getenv("MODEL")
 	if modelName == "" {
-		modelName = "anthropic/claude-3.5-sonnet"
+		modelName = "anthropic/claude-sonnet-4-5-20250929"
 	}
 
 	model, err := openai.New(modelName, modelCfg)

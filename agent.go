@@ -18,19 +18,30 @@ import (
 
 // baseAgent implements the Agent interface (unexported).
 type baseAgent struct {
-	model    models.Model
-	env      environments.Environment
-	cfg      Config
-	messages []Message
-	step     int
+	model      models.Model
+	env        executor.Environment
+	cfg        Config
+	messages   []Message
+	step       int
+	totalUsage models.TokenUsage
 }
 
 // New creates an agent with required dependencies and optional config.
 // Model and Environment are required, Config uses defaults if zero value.
-func New(model models.Model, env environments.Environment, cfg Config) (Agent, error) {
-	// Apply defaults for zero values
+// Falls back to env vars for maxSteps (MAX_STEPS) and contextLimit (CONTEXT_LIMIT).
+func New(model models.Model, env executor.Environment, cfg Config) (Agent, error) {
+	// Apply defaults for zero values, with env var fallbacks
 	if cfg.maxSteps == 0 {
-		cfg.maxSteps = 25
+		if v, err := strconv.Atoi(os.Getenv("MAX_STEPS")); err == nil && v > 0 {
+			cfg.maxSteps = v
+		} else {
+			cfg.maxSteps = 25
+		}
+	}
+	if cfg.contextLimit == 0 {
+		if v, err := strconv.Atoi(os.Getenv("CONTEXT_LIMIT")); err == nil && v > 0 {
+			cfg.contextLimit = v
+		}
 	}
 	if cfg.systemPrompt == "" {
 		cfg.systemPrompt = DefaultSystemPrompt
@@ -58,6 +69,7 @@ func New(model models.Model, env environments.Environment, cfg Config) (Agent, e
 func (a *baseAgent) Run(ctx context.Context, task string) (string, error) {
 	// Initialize conversation
 	a.messages = []Message{}
+	a.totalUsage = models.TokenUsage{}
 	a.addMessage(RoleSystem, a.cfg.systemPrompt)
 	a.addMessage(RoleUser, task)
 
@@ -130,15 +142,29 @@ func (a *baseAgent) Step(ctx context.Context) (string, error) {
 	a.cfg.logger.Debug().Msg("querying model")
 
 	// 1. Query the model
-	response, err := a.model.Query(ctx, a.messages)
+	response, usage, err := a.model.Query(ctx, a.messages)
 	if err != nil {
 		a.cfg.logger.Error().Err(err).Msg("query failed")
 		return "", fmt.Errorf("query failed: %w", err)
 	}
 
-	a.cfg.logger.Debug().
-		Int("response_length", len(response)).
-		Msg("got response")
+	// Track cumulative token usage
+	a.totalUsage.PromptTokens += usage.PromptTokens
+	a.totalUsage.CompletionTokens += usage.CompletionTokens
+	a.totalUsage.TotalTokens += usage.TotalTokens
+
+	logEvent := a.cfg.logger.Debug().
+		Int("prompt_tokens", usage.PromptTokens).
+		Int("completion_tokens", usage.CompletionTokens).
+		Str("total_tokens", formatTokens(a.totalUsage.TotalTokens))
+	if a.cfg.contextLimit > 0 {
+		remaining := a.cfg.contextLimit - a.totalUsage.TotalTokens
+		logEvent = logEvent.
+			Str("context_usage", fmt.Sprintf("%s/%s", formatTokens(a.totalUsage.TotalTokens), formatTokens(a.cfg.contextLimit))).
+			Str("context_remaining", formatTokens(remaining))
+	}
+	logEvent.Msg("got response")
+
 	a.cfg.logger.Trace().
 		Str("response", response).
 		Msg("full response")
@@ -269,4 +295,14 @@ func (a *baseAgent) addMessage(role string, content string) {
 // Messages returns the current conversation history (for debugging/testing).
 func (a *baseAgent) Messages() []Message {
 	return a.messages
+}
+
+// formatTokens formats a token count for human readability.
+// Examples: 280 → "280", 1200 → "1.2K", 131072 → "131.1K"
+func formatTokens(n int) string {
+	if n < 1000 {
+		return strconv.Itoa(n)
+	}
+	v := float64(n) / 1000.0
+	return fmt.Sprintf("%.1fK", v)
 }
