@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
+	"strconv"
 	"strings"
 
-	"github.com/j0lvera/wise/environments"
-	"github.com/j0lvera/wise/environments/local"
+	"github.com/j0lvera/wise/executor"
+	"github.com/j0lvera/wise/executor/local"
 	"github.com/j0lvera/wise/models"
 
 	"github.com/rs/zerolog"

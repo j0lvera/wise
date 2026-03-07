@@ -3,15 +3,16 @@ package wise
 import (
 	"context"
 
-	"github.com/j0lvera/wise/environments"
+	"github.com/j0lvera/wise/executor"
 	"github.com/j0lvera/wise/models"
 )
 
 // Re-export types for convenience.
 type (
-	Message = models.Message
-	Action  = environments.Action
-	Output  = environments.Output
+	Message    = models.Message
+	TokenUsage = models.TokenUsage
+	Action     = executor.Action
+	Output     = executor.Output
 )
 
 // Role constants.

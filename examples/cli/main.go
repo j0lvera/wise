@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/j0lvera/wise"
-	"github.com/j0lvera/wise/environments/local"
+	"github.com/j0lvera/wise/executor/local"
 	"github.com/j0lvera/wise/models/openai"
 
 	"github.com/spf13/cobra"

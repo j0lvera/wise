@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/j0lvera/wise/environments/local"
+	"github.com/j0lvera/wise/executor/local"
 )
 
 // commandRegex is compiled once at package level for performance.
